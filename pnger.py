@@ -39,8 +39,8 @@ if __name__ == '__main__':
 
     ihdr_chunk = [
         chunk for chunk in chunks 
-        if chunk.get('type') == 'IHDR'][0]
-    ]
+        if chunk.get('type') == 'IHDR'
+    ][0]
 
     ihdr_data = ihdr_chunk.get('data')
     image_width = int.from_bytes(ihdr_data[0:4], 'big')
@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
     idat_chunk = [
         chunk for chunk in chunks 
-        if chunk.get('type') == 'IDAT'][0]
-    ]
+        if chunk.get('type') == 'IDAT'
+    ][0]
 
     image_data = idat_chunk.get('data')
