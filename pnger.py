@@ -1,4 +1,4 @@
-class ErrorDude(Exception):
+class InvalidPNG(Exception):
     pass
 
 def split_into_chunks(file_bytes, chunks=[]):
