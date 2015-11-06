@@ -12,8 +12,8 @@ def split_into_chunks(file_bytes, chunks=[]):
         return chunks
 
     chunk_data_length = int.from_bytes(file_bytes[0:4], 'big')
-    data_end = 8 + chunk_data_length
-    chunk_end = data_end + 4
+    data_end = 8 + chunk_data_length # 8 bytes for the length and the type
+    chunk_end = data_end + 4 # The 4 bytes represent the crc
     chunk_type = file_bytes[4:8].decode('utf-8')
     chunk_data = file_bytes[8:data_end]
     chunck_crc = file_bytes[data_end:chunk_end]
