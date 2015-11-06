@@ -1,3 +1,6 @@
+from collections import namedtuple
+import zlib
+
 class InvalidPNG(Exception):
     pass
 
