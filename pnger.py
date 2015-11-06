@@ -29,6 +29,35 @@ def split_into_chunks(file_bytes, chunks=[]):
 
     return split_into_chunks(file_bytes[chunk_end:], chunks)
 
+def parse_ihdr_data(ihdr_data):
+    Header = namedtuple(
+        'Header',
+        ['width', 'height', 'bit_depth', 'color_type','compression_type',
+        'filter_type', 'interlace_type'])    
+
+    return Header(
+        width=int.from_bytes(ihdr_data[0:4], 'big'),
+        height=int.from_bytes(ihdr_data[4:8], 'big'),
+        bit_depth=ihdr_data[8],
+        color_type=ihdr_data[9],
+        compression_type=ihdr_data[10],
+        filter_type = ihdr_data[11],
+        interlace_type = ihdr_data[12]
+    )
+
+def parse_idat_data(idat_data):
+    Compressed = namedtuple(
+        'Compressed', ['method', 'flags', 'data', 'check'])
+
+    data_end = len(idat_data) - 4
+
+    return Compressed(
+        method=idat_data[0],
+        flags=idat_data[1],
+        data=idat_data[2:data_end],
+        check=idat_data[data_end:]
+    )
+
 if __name__ == '__main__':
     with open('ok.png', 'rb') as file:
         image = file.read()
