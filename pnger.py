@@ -74,13 +74,11 @@ if __name__ == '__main__':
         if chunk.get('type') == 'IHDR'
     ][0]
 
-    ihdr_data = ihdr_chunk.get('data')
-    image_width = int.from_bytes(ihdr_data[0:4], 'big')
-    image_height = int.from_bytes(ihdr_data[4:8], 'big')
+    ihdr = parse_ihdr_data(ihdr_chunk.get('data'))
 
     idat_chunk = [
         chunk for chunk in chunks 
         if chunk.get('type') == 'IDAT'
     ][0]
 
-    image_data = idat_chunk.get('data')
+    image_data = zlib.decompress(idat_chunk.get('data'))
