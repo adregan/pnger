@@ -29,7 +29,8 @@ def split_into_chunks(file_bytes, chunks=[]):
 
     return split_into_chunks(file_bytes[chunk_end:], chunks)
 
-def parse_ihdr_data(ihdr_data):
+def parse_ihdr_data(ihdr_chunk):
+    ihdr_data = ihdr_chunk.get('data')
     Header = namedtuple(
         'Header',
         ['width', 'height', 'bit_depth', 'color_type','compression_type',
