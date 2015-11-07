@@ -45,18 +45,26 @@ def parse_ihdr_data(ihdr_data):
         interlace_type = ihdr_data[12]
     )
 
-def parse_idat_data(idat_data):
-    Compressed = namedtuple(
-        'Compressed', ['method', 'flags', 'data', 'check'])
+def parse_chunks(chunks):
+    try:
+        image_header = parse_ihdr_data([
+            chunk for chunk in chunks 
+            if chunk.get('type') == 'IHDR'
+        ][0])
+    except IndexError as err:
+        raise InvalidPNG('Missing IHDR chunk')
 
-    data_end = len(idat_data) - 4
+    try:
+        image_data = zlib.decompress(
+            b''.join([
+                idat.get('data')
+                for idat in [
+                    chunk for chunk in chunks 
+                    if chunk.get('type') == 'IDAT']]))
+    except IndexError as err:
+        raise InvalidPNG('Invalid IDAT chunks')
 
-    return Compressed(
-        method=idat_data[0],
-        flags=idat_data[1],
-        data=idat_data[2:data_end],
-        check=idat_data[data_end:]
-    )
+    return image_header, image_data
 
 if __name__ == '__main__':
     with open('ok.png', 'rb') as file:
