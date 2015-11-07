@@ -78,16 +78,4 @@ if __name__ == '__main__':
 
     chunks = split_into_chunks(image[8:])
 
-    ihdr_chunk = [
-        chunk for chunk in chunks 
-        if chunk.get('type') == 'IHDR'
-    ][0]
-
-    ihdr = parse_ihdr_data(ihdr_chunk.get('data'))
-
-    idat_chunk = [
-        chunk for chunk in chunks 
-        if chunk.get('type') == 'IDAT'
-    ][0]
-
-    image_data = zlib.decompress(idat_chunk.get('data'))
+    image_header, image_data = parse_chunks(chunks)
