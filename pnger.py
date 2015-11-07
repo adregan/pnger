@@ -4,6 +4,11 @@ import zlib
 class InvalidPNG(Exception):
     pass
 
+class UnderConstruction(Exception):
+    ''' Imagine the little animated GIF
+    '''
+    pass
+
 def split_into_chunks(file_bytes, chunks=[]):
     ''' chunks should look like this:
         {'length': int, 'type': str, 'data': bytes, 'crc': int}
@@ -76,6 +81,6 @@ if __name__ == '__main__':
     if image[0:8] != valid_png_header:
         raise InvalidPNG('not a valid header')
 
-    chunks = split_into_chunks(image[8:])
+    image_header, image_data = parse_chunks(split_into_chunks(image[8:]))
 
-    image_header, image_data = parse_chunks(chunks)
+    scanlines = create_pixels(image_header, image_data)
