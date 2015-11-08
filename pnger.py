@@ -72,6 +72,23 @@ def parse_chunks(chunks):
 
     return image_header, image_data
 
+def create_scanlines(header, data):
+    if header.color_type == 6:
+        color_byte_shift = 4
+        Pixel = namedtuple('Pixel', ['red', 'green', 'blue', 'alpha'])
+    else:
+        # TODO: implement other color types
+        raise UnderConstruction('Sorry dude.')
+
+    scanline_length = header.width * color_byte_shift + 1
+
+    scanlines = []
+    for i in range(header.height):
+        scanline = list(data[(scanline_length * i):(scanline_length*(i + 1))])
+        scanlines.append(scanline)
+
+    return scanlines
+
 if __name__ == '__main__':
     with open('ok.png', 'rb') as file:
         image = file.read()
@@ -83,4 +100,4 @@ if __name__ == '__main__':
 
     image_header, image_data = parse_chunks(split_into_chunks(image[8:]))
 
-    scanlines = create_pixels(image_header, image_data)
+    scanlines = create_scanlines(image_header, image_data)
