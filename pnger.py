@@ -85,21 +85,17 @@ def split_scanlines(width, height, pixel_size, data):
 
     return scanlines
 
+def create_pixel_scanlines(header, data):
     if header.color_type == 6:
-        color_byte_shift = 4
         Pixel = namedtuple('Pixel', ['red', 'green', 'blue', 'alpha'])
     else:
         # TODO: implement other color types
         raise UnderConstruction('Sorry dude.')
 
-    scanline_length = header.width * color_byte_shift + 1
+    scanlines = split_scanlines(
+        header.width, header.height, len(Pixel._fields), data)
 
-    scanlines = []
-    for i in range(header.height):
-        scanline = list(data[(scanline_length * i):(scanline_length*(i + 1))])
-        scanlines.append(scanline)
-
-    return scanlines
+    return [create_pixels(Pixel, scanline) for scanline in scanlines]
 
 if __name__ == '__main__':
     with open('ok.png', 'rb') as file:
