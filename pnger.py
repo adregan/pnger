@@ -9,6 +9,9 @@ class UnderConstruction(Exception):
     '''
     pass
 
+# TODO: Make dicts to hold the different pixel types 
+# and the different filter types
+
 def split_into_chunks(file_bytes, chunks=[]):
     ''' chunks should look like this:
         {'length': int, 'type': str, 'data': bytes, 'crc': int}
