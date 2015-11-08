@@ -108,4 +108,4 @@ if __name__ == '__main__':
 
     image_header, image_data = parse_chunks(split_into_chunks(image[8:]))
 
-    scanlines = create_scanlines(image_header, image_data)
+    pixels = create_pixel_scanlines(image_header, image_data)
