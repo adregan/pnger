@@ -75,7 +75,16 @@ def parse_chunks(chunks):
 
     return image_header, image_data
 
-def create_scanlines(header, data):
+def split_scanlines(width, height, pixel_size, data):
+    scanline_length = width * pixel_size + 1
+
+    scanlines = [
+        data[(scanline_length * i):(scanline_length * (i + 1))]
+        for i in range(height)
+    ]
+
+    return scanlines
+
     if header.color_type == 6:
         color_byte_shift = 4
         Pixel = namedtuple('Pixel', ['red', 'green', 'blue', 'alpha'])
