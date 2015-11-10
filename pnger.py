@@ -16,18 +16,19 @@ PIXELS = {
 
 # http://www.libpng.org/pub/png/spec/1.2/PNG-Filters.html
 
-def filter_algorithm(type, current_byte, index_in_scanline, scanline, prior_scanline=[]):
+def filter_algorithm(type, current_byte, index_in_scanline, reconstructed_scanline):
     if type == 0:
         return current_byte
     elif type == 1:
-        ''' Sub[x] + Raw(x-bpp)
-            Sub(x) is the current_byte
-            Raw(x-bpp) is the previous byte (of that color)
+        ''' Recon(x) = Filt(x) + Recon(a)
+            Filt(x) is the current_byte
+            Recon(a) is the byte in the same positions in 
+            the previous reconstructed pixel
         '''
-        sub_x = current_byte
-        raw_x_bpp = 0 if (index_in_scanline - bytes_per_pixel) <= bytes_per_pixel else index_in_scanline - bytes_per_pixel
-        # print(int(current_byte + scanline[raw_x_bpp]))
-        return int(current_byte + scanline[raw_x_bpp]) % 256
+        filt_x = current_byte
+        a = index_in_scanline - bytes_per_pixel
+        recon_a = 0 if (a < 0) else reconstructed_scanline[a]
+        return int(current_byte + recon_a)
 
 # def none(current_byte, index_in_scanline, scanline, prior_scanline=[]):
 #     return current_byte
@@ -129,17 +130,14 @@ def split_raw_scanlines(width, height, bytes_per_pixel, data):
 def create_pixels(Pixel, scanline, bytes_per_pixel, prior_scanline=[]):
     filter_type_byte = scanline[0]
     bytes_only = scanline[1:]
+    reconstructed_scanline = list(bytes_only)
 
-    return [
-        filter_algorithm(
-            filter_type_byte,
-            byte,
-            i, 
-            bytes_only
-        )
-        for i, byte in enumerate(bytes_only)
-    ]
+    for i, byte in enumerate(bytes_only):
+        reconstructed = filter_algorithm(
+            filter_type_byte, byte, i, reconstructed_scanline)
+        reconstructed_scanline[i] = reconstructed
 
+    print(reconstructed_scanline)
 
     # algo = FILTER_ALGORITHMS[filter_type_byte]
 
