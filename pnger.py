@@ -94,27 +94,40 @@ def parse_chunks(chunks):
 
     return image_header, image_data
 
-def split_raw_scanlines(width, height, bytes_per_pixel, data):
+def split_scanlines(width, height, bytes_per_pixel, data):
     scanline_length = width * bytes_per_pixel + 1
 
-    scanlines = [
-        data[(scanline_length * i):(scanline_length * (i + 1))]
-        for i in range(height)
-    ]
+    return [
+        {'type': scanline[0], 'bytes': scanline[1:]}
+        for scanline in [
+            data[(scanline_length * i):(scanline_length * (i + 1))]
+            for i in range(height)]]
 
-    return scanlines
+def reconstruct(scanlines, bytes_per_pixel):
+    reconstructed = []
+    for y, scanline in enumerate(scanlines[0:2]):
+        filter_func = Filters[scanline.get('type')]
+        reconstructed_line = []
+        reconstructed.append(reconstructed_line)
+        for x, byte in enumerate(scanline.get('bytes')):
+            position = Posn(x, y)
+            reconstructed_byte = filter_func(
+                scanlines, position, 'reconstruct', bytes_per_pixel, reconstructed)
+            reconstructed_line.append(reconstructed_byte)
 
-def create_pixels(Pixel, scanline, bytes_per_pixel, prior_scanline=[]):
-    filter_type_byte = scanline[0]
-    bytes_only = scanline[1:]
-    reconstructed_scanline = list(bytes_only)
+    return reconstructed
 
-    for i, byte in enumerate(bytes_only):
-        reconstructed = filter_algorithm(
-            filter_type_byte, byte, i, reconstructed_scanline)
-        reconstructed_scanline[i] = reconstructed
+# def create_pixels(Pixel, scanline, bytes_per_pixel, prior_scanline=[]):
+#     filter_type_byte = scanline[0]
+#     bytes_only = scanline[1:]
+#     reconstructed_scanline = list(bytes_only)
 
-    print(reconstructed_scanline)
+#     for i, byte in enumerate(bytes_only):
+#         reconstructed = filter_algorithm(
+#             filter_type_byte, byte, i, reconstructed_scanline)
+#         reconstructed_scanline[i] = reconstructed
+
+#     print(reconstructed_scanline)
 
     # algo = FILTER_ALGORITHMS[filter_type_byte]
 
@@ -146,13 +159,12 @@ if __name__ == '__main__':
         bytes_per_pixel = int(
             len(Pixel._fields) * (image_header.bit_depth / 8))
 
-    scanlines = split_raw_scanlines(
+    scanlines = split_scanlines(
         image_header.width,
         image_header.height,
         bytes_per_pixel, 
         image_data
     )
 
-    pixels = create_pixels(Pixel, scanlines[0], bytes_per_pixel)
+    reconstructed_scanlines = reconstruct(scanlines, bytes_per_pixel)
 
-    # pixel_lines = create_scanlines(image_header, image_data)
