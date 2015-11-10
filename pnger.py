@@ -1,5 +1,6 @@
 from collections import namedtuple
 import zlib
+from filters import Filters
 
 class InvalidPNG(Exception):
     pass
