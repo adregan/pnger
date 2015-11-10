@@ -4,13 +4,54 @@ import zlib
 class InvalidPNG(Exception):
     pass
 
-class UnderConstruction(Exception):
-    ''' Imagine the little animated GIF
-    '''
-    pass
+# TODO: Make dict to hold the different filter types
 
-# TODO: Make dicts to hold the different pixel types 
-# and the different filter types
+PIXELS = {
+    0: namedtuple('Pixel', ['gray']),
+    2: namedtuple('Pixel', ['red', 'green', 'blue']),
+    # 3: A Palette index,
+    4: namedtuple('Pixel', ['gray', 'alpha']),
+    6: namedtuple('Pixel', ['red', 'green', 'blue', 'alpha'])
+}
+
+# http://www.libpng.org/pub/png/spec/1.2/PNG-Filters.html
+
+def filter_algorithm(type, current_byte, index_in_scanline, scanline, prior_scanline=[]):
+    if type == 0:
+        return current_byte
+    elif type == 1:
+        ''' Sub[x] + Raw(x-bpp)
+            Sub(x) is the current_byte
+            Raw(x-bpp) is the previous byte (of that color)
+        '''
+        sub_x = current_byte
+        raw_x_bpp = 0 if (index_in_scanline - bytes_per_pixel) <= bytes_per_pixel else index_in_scanline - bytes_per_pixel
+        # print(int(current_byte + scanline[raw_x_bpp]))
+        return int(current_byte + scanline[raw_x_bpp]) % 256
+
+# def none(current_byte, index_in_scanline, scanline, prior_scanline=[]):
+#     return current_byte
+
+# def sub(current_byte, index_in_scanline, scanline, prior_scanline=[]):
+#     ''' Sub(x) + Raw(x-bpp)
+#     '''
+#     if index_in_scanline == 0:
+
+#     return 
+# def up(current_byte, prior_byte, byte_above, byte_prior_to_above, bytes_per_pixel):
+#     pass
+# def average(current_byte, prior_byte, byte_above, byte_prior_to_above, bytes_per_pixel):
+#     pass
+# def paeth(current_byte, prior_byte, byte_above, byte_prior_to_above, bytes_per_pixel):
+#     pass
+
+# FILTER_ALGORITHMS = {
+#     0: lambda *args: None,
+#     1: sub,
+#     2: up,
+#     3: average,
+#     4: paeth
+# }
 
 def split_into_chunks(file_bytes, chunks=[]):
     ''' chunks should look like this:
@@ -75,8 +116,8 @@ def parse_chunks(chunks):
 
     return image_header, image_data
 
-def split_scanlines(width, height, pixel_size, data):
-    scanline_length = width * pixel_size + 1
+def split_raw_scanlines(width, height, bytes_per_pixel, data):
+    scanline_length = width * bytes_per_pixel + 1
 
     scanlines = [
         data[(scanline_length * i):(scanline_length * (i + 1))]
@@ -85,20 +126,34 @@ def split_scanlines(width, height, pixel_size, data):
 
     return scanlines
 
-def create_pixel_scanlines(header, data):
-    if header.color_type == 6:
-        Pixel = namedtuple('Pixel', ['red', 'green', 'blue', 'alpha'])
-    else:
-        # TODO: implement other color types
-        raise UnderConstruction('Sorry dude.')
+def create_pixels(Pixel, scanline, bytes_per_pixel, prior_scanline=[]):
+    filter_type_byte = scanline[0]
+    bytes_only = scanline[1:]
 
-    scanlines = split_scanlines(
-        header.width, header.height, len(Pixel._fields), data)
+    return [
+        filter_algorithm(
+            filter_type_byte,
+            byte,
+            i, 
+            bytes_only
+        )
+        for i, byte in enumerate(bytes_only)
+    ]
 
-    return [create_pixels(Pixel, scanline) for scanline in scanlines]
+
+    # algo = FILTER_ALGORITHMS[filter_type_byte]
+
+    # [algo(byte, i, scanline) for i, byte in enumerate(scanline)]
+
+    # data = scanline[1:]
+    # pixel_range = range(len(scanline[1:]))[::len(Pixel._fields)]
+
+    # return [
+    #     Pixel(*data[pixel_index:pixel_range[i+1]])
+    #     for i, pixel_index in enumerate(pixel_range[:-1])]
 
 if __name__ == '__main__':
-    with open('ok.png', 'rb') as file:
+    with open('test.png', 'rb') as file:
         image = file.read()
 
     valid_png_header = b'\x89PNG\r\n\x1a\n'
@@ -108,4 +163,21 @@ if __name__ == '__main__':
 
     image_header, image_data = parse_chunks(split_into_chunks(image[8:]))
 
-    pixels = create_pixel_scanlines(image_header, image_data)
+    try:
+        Pixel = PIXELS[image_header.color_type]
+    except KeyError as err:
+        raise UnemplementedError('I haven\'t done that yet.')
+    else:
+        bytes_per_pixel = int(
+            len(Pixel._fields) * (image_header.bit_depth / 8))
+
+    scanlines = split_raw_scanlines(
+        image_header.width,
+        image_header.height,
+        bytes_per_pixel, 
+        image_data
+    )
+
+    pixels = create_pixels(Pixel, scanlines[0], bytes_per_pixel)
+
+    # pixel_lines = create_scanlines(image_header, image_data)
