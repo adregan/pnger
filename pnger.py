@@ -15,7 +15,7 @@ PIXELS = {
     6: namedtuple('Pixel', ['red', 'green', 'blue', 'alpha'])
 }
 
-# http://www.libpng.org/pub/png/spec/1.2/PNG-Filters.html
+Posn = namedtuple('Posn', ['x', 'y'])
 
 def filter_algorithm(type, current_byte, index_in_scanline, reconstructed_scanline):
     if type == 0:
