@@ -31,30 +31,6 @@ def filter_algorithm(type, current_byte, index_in_scanline, reconstructed_scanli
         recon_a = 0 if (a < 0) else reconstructed_scanline[a]
         return int(current_byte + recon_a)
 
-# def none(current_byte, index_in_scanline, scanline, prior_scanline=[]):
-#     return current_byte
-
-# def sub(current_byte, index_in_scanline, scanline, prior_scanline=[]):
-#     ''' Sub(x) + Raw(x-bpp)
-#     '''
-#     if index_in_scanline == 0:
-
-#     return 
-# def up(current_byte, prior_byte, byte_above, byte_prior_to_above, bytes_per_pixel):
-#     pass
-# def average(current_byte, prior_byte, byte_above, byte_prior_to_above, bytes_per_pixel):
-#     pass
-# def paeth(current_byte, prior_byte, byte_above, byte_prior_to_above, bytes_per_pixel):
-#     pass
-
-# FILTER_ALGORITHMS = {
-#     0: lambda *args: None,
-#     1: sub,
-#     2: up,
-#     3: average,
-#     4: paeth
-# }
-
 def split_into_chunks(file_bytes, chunks=[]):
     ''' chunks should look like this:
         {'length': int, 'type': str, 'data': bytes, 'crc': int}
