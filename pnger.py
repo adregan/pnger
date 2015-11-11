@@ -1,10 +1,11 @@
 from collections import namedtuple
 import zlib
-from filters import Filters
+from reconstruct import reconstructer
 
 class InvalidPNG(Exception):
     pass
-
+class UnemplementedError(Exception):
+    pass
 # TODO: Make dict to hold the different filter types
 
 PIXELS = {
@@ -103,20 +104,6 @@ def split_scanlines(width, height, bytes_per_pixel, data):
             data[(scanline_length * i):(scanline_length * (i + 1))]
             for i in range(height)]]
 
-def reconstruct(scanlines, bytes_per_pixel):
-    reconstructed = []
-    for y, scanline in enumerate(scanlines):
-        filter_func = Filters[scanline.get('type')]
-        reconstructed_line = []
-        reconstructed.append(reconstructed_line)
-        for x, byte in enumerate(scanline.get('bytes')):
-            position = Posn(x, y)
-            reconstructed_byte = filter_func(
-                scanlines, position, 'reconstruct', bytes_per_pixel, reconstructed)
-            reconstructed_line.append(reconstructed_byte)
-
-    return reconstructed
-
 def create_pixels(Pixel, scanline, bytes_per_pixel):
     pixel_range = range(len(scanline))[::bytes_per_pixel]
 
@@ -150,7 +137,10 @@ if __name__ == '__main__':
         image_data
     )
 
-    reconstructed_scanlines = reconstruct(scanlines, bytes_per_pixel)
+    reconstructed_scanlines = reconstructer(scanlines, bytes_per_pixel)
 
-    pixels = [create_pixels(Pixel, scanline, bytes_per_pixel) for scanline in reconstructed_scanlines]
+    pixels = [
+        create_pixels(Pixel, scanline, bytes_per_pixel)
+        for scanline in reconstructed_scanlines
+    ]
 
