@@ -1,7 +1,9 @@
 from filters import Filters
 
+filt = Filters('filter')
+
 def filterer(scanlines, bpp):
-    scanline_bytes = [scanline.get('data') for scanline in scanlines]
+    scanline_bytes = [list(scanline.get('bytes')) for scanline in scanlines]
 
     def filter_byte(filter_type, current_byte, y, x):
         a = b = c = 0
@@ -18,7 +20,7 @@ def filterer(scanlines, bpp):
         except IndexError as err:
             pass
 
-        return Filters[filter_type](current_byte, a, b, c)
+        return filt[filter_type](current_byte, a, b, c)
 
     filtered = []
 
