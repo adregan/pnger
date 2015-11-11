@@ -105,7 +105,7 @@ def split_scanlines(width, height, bytes_per_pixel, data):
 
 def reconstruct(scanlines, bytes_per_pixel):
     reconstructed = []
-    for y, scanline in enumerate(scanlines[0:2]):
+    for y, scanline in enumerate(scanlines):
         filter_func = Filters[scanline.get('type')]
         reconstructed_line = []
         reconstructed.append(reconstructed_line)
