@@ -111,6 +111,15 @@ def create_pixels(Pixel, scanline, bytes_per_pixel):
         Pixel(*scanline[pixel_index:pixel_range[i+1]])
         for i, pixel_index in enumerate(pixel_range[:-1])]
 
+def save_it_down(name, reconstructed_scanlines):
+    from PIL import Image
+    proof = Image.frombytes(
+        mode='RGBA',
+        size=(image_header.width, image_header.height),
+        data=bytes([l for sl in reconstructed_scanlines for l in sl]))
+
+    proof.save('{}.png'.format(name))
+
 if __name__ == '__main__':
     with open('test.png', 'rb') as file:
         image = file.read()
@@ -138,6 +147,8 @@ if __name__ == '__main__':
     )
 
     reconstructed_scanlines = reconstructer(scanlines, bytes_per_pixel)
+
+    # save_it_down('cool', reconstructed_scanlines)
 
     pixels = [
         create_pixels(Pixel, scanline, bytes_per_pixel)
