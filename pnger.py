@@ -117,28 +117,12 @@ def reconstruct(scanlines, bytes_per_pixel):
 
     return reconstructed
 
-# def create_pixels(Pixel, scanline, bytes_per_pixel, prior_scanline=[]):
-#     filter_type_byte = scanline[0]
-#     bytes_only = scanline[1:]
-#     reconstructed_scanline = list(bytes_only)
+def create_pixels(Pixel, scanline, bytes_per_pixel):
+    pixel_range = range(len(scanline))[::bytes_per_pixel]
 
-#     for i, byte in enumerate(bytes_only):
-#         reconstructed = filter_algorithm(
-#             filter_type_byte, byte, i, reconstructed_scanline)
-#         reconstructed_scanline[i] = reconstructed
-
-#     print(reconstructed_scanline)
-
-    # algo = FILTER_ALGORITHMS[filter_type_byte]
-
-    # [algo(byte, i, scanline) for i, byte in enumerate(scanline)]
-
-    # data = scanline[1:]
-    # pixel_range = range(len(scanline[1:]))[::len(Pixel._fields)]
-
-    # return [
-    #     Pixel(*data[pixel_index:pixel_range[i+1]])
-    #     for i, pixel_index in enumerate(pixel_range[:-1])]
+    return [
+        Pixel(*scanline[pixel_index:pixel_range[i+1]])
+        for i, pixel_index in enumerate(pixel_range[:-1])]
 
 if __name__ == '__main__':
     with open('test.png', 'rb') as file:
@@ -167,4 +151,6 @@ if __name__ == '__main__':
     )
 
     reconstructed_scanlines = reconstruct(scanlines, bytes_per_pixel)
+
+    pixels = [create_pixels(Pixel, scanline, bytes_per_pixel) for scanline in reconstructed_scanlines]
 
