@@ -20,118 +20,60 @@ import math
     Posn is position of x, y where y is the scanline and x is the position in the scanline
 '''
 
-def none(scanlines, position, *args):
+def none(x, a, b, c):
     ''' filter = Orig(x)
         reconstruct = Filt(x)
         Will always return the current byte
     '''
-    current_byte = scanlines[position.y].get('bytes')[position.x]
-    return current_byte % 256
+    return x
 
-def sub(scanlines, position, type, bytes_per_pixel, reconstructed):
+def sub(x, a, b, c):
     ''' filter = Orig(x) - Orig(a)
         filter = current_byte - original_byte_to_the_left
 
         reconstruct = Filt(x) + Recon(a)
         reconstruct = current_byte + reconstructed_byte_to_the_left
     '''
-    scanline = scanlines[position.y].get('bytes', [])
-    current_byte = scanline[position.x]
+    return int(x - a) % 256
 
-    byte_to_the_left_i = position.x - bytes_per_pixel
-
-    if type == 'filter':
-        original_byte_to_the_left = 0 if (byte_to_the_left_i < 0) else scanline[byte_to_the_left_i]
-        return int(current_byte - original_byte_to_the_left) % 256
-    else:
-        reconstructed_byte_to_the_left = 0 if (byte_to_the_left_i < 0) else reconstructed[position.y][byte_to_the_left_i]
-        return int(current_byte + reconstructed_byte_to_the_left) % 256
-
-def up(scanlines, position, type, bytes_per_pixel, reconstructed):
+def up(x, a, b, c):
     ''' filter = Orig(x) - Orig(b)
         filter = current_byte - original_byte_above
 
         reconstruct = Filt(x) + Recon(b)
         reconstruct = current_byte + reconstructed_byte_above
     '''
-    scanline = scanlines[position.y].get('bytes', [])
-    current_byte = scanline[position.x]
+    return int(x - b) % 256
 
-    if type == 'filter':
-        original_byte_above = 0 if ((position.y - 1) < 0) else scanlines[position.y - 1].get('bytes')[position.x]
-        return int(current_byte - original_byte_above) % 256
-    else:
-        reconstructed_byte_above = 0 if ((position.y - 1) < 0) else reconstructed[position.y - 1][position.x]
-        return int(current_byte + reconstructed_byte_above) % 256
-
-
-def average(scanlines, position, type, bytes_per_pixel, reconstructed):
+def average(x, a, b, c):
     ''' filter = Orig(x) - floor((Orig(a) + Orig(b)) / 2)
         filter = current_byte - floor((original_byte_to_the_left + original_byte_above) / 2)
 
         reconstruct = Filt(x) + floor((Recon(a) + Recon(b)) / 2)
         reconstruct = current_byte + floor((reconstructed_byte_to_the_left + reconstructed_byte_above) / 2)
     '''
-    scanline = scanlines[position.y].get('bytes', [])
-    current_byte = scanline[position.x]
+    return int(x - math.floor((a + b)/ 2)) % 256
 
-    byte_to_the_left_i = position.x - bytes_per_pixel
-    if type == 'filter':
-        original_byte_above = 0 if ((position.y - 1) < 0) else scanlines[position.y - 1].get('bytes')[position.x]
-        original_byte_to_the_left = 0 if (byte_to_the_left_i < 0) else scanline[byte_to_the_left_i]
-
-        return int(current_byte - math.floor((original_byte_to_the_left + original_byte_above)/ 2)) % 256
-    else:
-        reconstructed_byte_above = 0 if ((position.y - 1) < 0) else reconstructed[position.y - 1][position.x]
-        reconstructed_byte_to_the_left = 0 if (byte_to_the_left_i < 0) else reconstructed[position.y][byte_to_the_left_i]
-
-        return int(current_byte + math.floor((reconstructed_byte_to_the_left + reconstructed_byte_above)/ 2)) % 256
-
-def paeth(scanlines, position, type, bytes_per_pixel, reconstructed):
+def paeth(x, a, b, c):
     ''' filter = Orig(x) - PaethPredictor(Orig(a), Orig(b), Orig(c))
         filter = current_byte - PaethPredictor(original_byte_to_the_left, original_byte_above, original_byte_above_and_left)
 
         reconstruct = Filt(x) + PaethPredictor(Recon(a), Recon(b), Recon(c))
         reconstruct = current_byte + PaethPredictor(reconstructed_byte_to_the_left, reconstructed_byte_above, reconstructed_byte_above_and_left)
     '''
-    scanline = scanlines[position.y].get('bytes', [])
-    current_byte = scanline[position.x]
+    def PaethPredictor(a, b, c):
+        p = a + b - c
+        pa = abs(p - a)
+        pb = abs(p - b)
+        pc = abs(p - c)
+        if (pa <= pb and pa <= pc):
+            return a
+        elif (pb <= pc):
+            return b
+        else:
+            return c
 
-    byte_to_the_left_i = position.x - bytes_per_pixel
-    up_and_to_the_left_i = position.x - (2 * bytes_per_pixel)
-
-    if type == 'filter':
-        original_byte_to_the_left = 0 if (byte_to_the_left_i < 0) else scanline[byte_to_the_left_i]
-        original_byte_above = 0 if ((position.y - 1) < 0) else scanlines[position.y - 1].get('bytes')[position.x]
-        original_byte_above_and_left = 0 if (((position.y - 1) < 0) or (byte_to_the_left_i < 0)) else scanlines[position.y - 1].get('bytes')[position.x - 1]
-
-        return int(current_byte - PaethPredictor(
-                original_byte_to_the_left,
-                original_byte_above,
-                original_byte_above_and_left)) % 256
-    else:
-        reconstructed_byte_to_the_left = 0 if (byte_to_the_left_i < 0) else reconstructed[position.y][byte_to_the_left_i]
-        reconstructed_byte_above = 0 if ((position.y - 1) < 0) else reconstructed[position.y - 1][position.x]
-        reconstructed_byte_above_and_left = 0 if (((position.y - 1) < 0) or (up_and_to_the_left_i < 0)) else reconstructed[position.y - 1][up_and_to_the_left_i]
-
-        return int(current_byte + PaethPredictor(
-                reconstructed_byte_to_the_left,
-                reconstructed_byte_above,
-                reconstructed_byte_above_and_left)) % 256
-
-def PaethPredictor(a, b, c):
-    p = a + b - c
-    pa = abs(p - a)
-    pb = abs(p - b)
-    pc = abs(p - c)
-    if (pa <= pb and pa <= pc):
-        Pr = a
-    elif (pb <= pc):
-        Pr = b
-    else:
-        Pr = c
-
-    return Pr
+    return int(x - PaethPredictor(a, b, c)) % 256
 
 Filters = {
     0: none,
