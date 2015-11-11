@@ -25,7 +25,8 @@ def none(scanlines, position, *args):
         reconstruct = Filt(x)
         Will always return the current byte
     '''
-    return current_byte
+    current_byte = scanlines[position.y].get('bytes')[position.x]
+    return current_byte % 256
 
 def sub(scanlines, position, type, bytes_per_pixel, reconstructed):
     ''' filter = Orig(x) - Orig(a)
