@@ -6,19 +6,11 @@ def filterer(scanlines, bpp):
     filtered = [list(scanline.get('bytes')) for scanline in scanlines]
 
     def filter_byte(filter_type, current_byte, y, x):
-        a = b = c = 0
-        try:
-            a = filtered[y][x - bpp]
-        except IndexError as err:
-            pass
-        try:
-            b = filtered[y - 1][x]
-        except IndexError as err:
-            pass
-        try:
-            c = filtered[y - 1][x - bpp]
-        except IndexError as err:
-            pass
+        above = y - 1
+        left = x - bpp
+        a = 0 if left < 0 else filtered[y][left]
+        b = 0 if above < 0 else filtered[above][x]
+        c = 0 if (above < 0 or left < 0) else filtered[above][left]
 
         return filt[filter_type](current_byte, a, b, c)
 
