@@ -175,4 +175,4 @@ def run(file_name):
         file.write(json.dumps(color_lines))
 
 if __name__ == '__main__':
-    run('ok')
+    run('cover')
