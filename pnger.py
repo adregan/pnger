@@ -121,6 +121,19 @@ def save_it_down(name, reconstructed_scanlines):
 
     proof.save('{}.png'.format(name))
 
+def classify(pixel_lines):
+    c = Classifier()
+    color_lines = []
+    for line in pixel_lines:
+        colors = [
+            c.classify(Point(pixel.red, pixel.green, pixel.blue, pixel.alpha))
+            for pixel in line
+        ]
+
+        color_lines.append(colors)
+
+    return color_lines
+
 def run(file_name):
     with open('{}.png'.format(file_name), 'rb') as file:
         image = file.read()
@@ -156,15 +169,7 @@ def run(file_name):
         for scanline in reconstructed_scanlines
     ]
 
-    c = Classifier()
-    color_lines = []
-    for line in pixel_lines:
-        colors = [
-            c.classify(Point(pixel.red, pixel.green, pixel.blue, pixel.alpha))
-            for pixel in line
-        ]
-
-        color_lines.append(colors)
+    color_lines = classify(pixel_lines)
 
     with open('{}_colors.json'.format(file_name), 'w') as file:
         file.write(json.dumps(color_lines))
