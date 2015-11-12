@@ -115,14 +115,14 @@ def create_pixels(Pixel, scanline, bytes_per_pixel):
 def save_it_down(name, reconstructed_scanlines):
     from PIL import Image
     proof = Image.frombytes(
-        mode='RGBA',
+        mode='RGB',
         size=(image_header.width, image_header.height),
         data=bytes([l for sl in reconstructed_scanlines for l in sl]))
 
     proof.save('{}.png'.format(name))
 
-if __name__ == '__main__':
-    with open('test.png', 'rb') as file:
+def run(file_name):
+    with open('{}.png'.format(file_name), 'rb') as file:
         image = file.read()
 
     valid_png_header = b'\x89PNG\r\n\x1a\n'
