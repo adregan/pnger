@@ -151,8 +151,23 @@ def run(file_name):
 
     # save_it_down('cool', reconstructed_scanlines)
 
-    pixels = [
+    pixel_lines = [
         create_pixels(Pixel, scanline, bytes_per_pixel)
         for scanline in reconstructed_scanlines
     ]
 
+    c = Classifier()
+    color_lines = []
+    for line in pixel_lines:
+        colors = [
+            c.classify(Point(pixel.red, pixel.green, pixel.blue, pixel.alpha))
+            for pixel in line
+        ]
+
+        color_lines.append(colors)
+
+    with open('{}_colors.json'.format(file_name), 'w') as file:
+        file.write(json.dumps(color_lines))
+
+if __name__ == '__main__':
+    run('ok')
