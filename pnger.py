@@ -1,12 +1,13 @@
 from collections import namedtuple
 import zlib
 from reconstruct import reconstructer
+from classifier import Point, Classifier
+import json
 
 class InvalidPNG(Exception):
     pass
 class UnemplementedError(Exception):
     pass
-# TODO: Make dict to hold the different filter types
 
 PIXELS = {
     0: namedtuple('Pixel', ['gray']),
