@@ -36,16 +36,19 @@ class Classifier(object):
             if dist < minimum:
                 minimum = dist;
                 minimum_index = i;
-            if 190 >= point.a <= 250:
+
+            if 190 <= point.a <= 250:
                 alpha = ', slightly transparent'
-            elif 127 >= point.a < 190:
+            elif 127 <= point.a < 190:
                 alpha = ', fairly transparent'
-            elif 63 >= point.a < 127:
+            elif 63 <= point.a < 127:
                 alpha = ', mostly transparent'
-            elif 5 >= point.a < 63:
+            elif 5 <= point.a < 63:
                 alpha = ', very transparent'
-            elif point.a < 5:
+            elif 1 <= point.a < 5:
                 alpha = ', pretty much invisible'
+            elif point.a == 0:
+                alpha = ', invisible'
             else:
                 alpha = ''
         
