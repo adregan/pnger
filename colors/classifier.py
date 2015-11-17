@@ -6,9 +6,7 @@
 
 import math
 import json
-
-with open('colors.json') as file:
-    COLORS = json.loads(file.read())
+from .colors import COLORS
 
 class Point(object):
     def __init__(self, x, y, z, a=255, label=None):
