@@ -25,23 +25,22 @@ def reconstructer(scanlines, bpp):
 class Decoder(object):
     def __init__(self, file_path):
         with open('{}'.format(file_path), 'rb') as file:
-            self.image = file.read()
+            self.image_bytes = file.read()
 
         valid_png_header = b'\x89PNG\r\n\x1a\n'
-
-        if self.image[0:8] != valid_png_header:
+        if self.image_bytes[0:8] != valid_png_header:
             raise InvalidPNG('not a valid header')
 
-        self.chunks = split_into_chunks(self.image[8:])
-        self.header, self.data = parse_header_and_data(self.chunks)
+        self.chunks = split_into_chunks(self.image_bytes[8:])
+        self.header_chunk, self.data_chunk = parse_header_and_data(self.chunks)
 
         try:
-            self.pixel = PIXELS[self.header.color_type]
+            self.pixel = PIXELS[self.header_chunk.color_type]
         except KeyError as err:
             raise KeyError('I haven\'t done that yet.')
         else:
             self.bpp = int(
-                len(self.pixel._fields) * (self.header.bit_depth / 8))
+                len(self.pixel._fields) * (self.header_chunk.bit_depth / 8))
 
     @property
     def Pixel(self):
@@ -53,11 +52,10 @@ class Decoder(object):
 
     def decode(self):
         scanlines = split_scanlines(
-            self.header.width,
-            self.header.height,
+            self.header_chunk.width,
+            self.header_chunk.height,
             self.bytes_per_pixel, 
-            self.data
+            self.data_chunk
         )
 
-        return reconstructer(
-            scanlines, self.bytes_per_pixel)
+        return reconstructer(scanlines, self.bytes_per_pixel)
