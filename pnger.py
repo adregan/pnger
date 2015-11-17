@@ -19,20 +19,6 @@ PIXELS = {
 
 Posn = namedtuple('Posn', ['x', 'y'])
 
-def filter_algorithm(type, current_byte, index_in_scanline, reconstructed_scanline):
-    if type == 0:
-        return current_byte
-    elif type == 1:
-        ''' Recon(x) = Filt(x) + Recon(a)
-            Filt(x) is the current_byte
-            Recon(a) is the byte in the same positions in 
-            the previous reconstructed pixel
-        '''
-        filt_x = current_byte
-        a = index_in_scanline - bytes_per_pixel
-        recon_a = 0 if (a < 0) else reconstructed_scanline[a]
-        return int(current_byte + recon_a)
-
 def split_into_chunks(file_bytes, chunks=[]):
     ''' chunks should look like this:
         {'length': int, 'type': str, 'data': bytes, 'crc': int}
