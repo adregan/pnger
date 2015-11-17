@@ -42,6 +42,14 @@ class Decoder(object):
             self.bpp = int(
                 len(self.pixel._fields) * (self.header_chunk.bit_depth / 8))
 
+        self.scanlines = split_scanlines(
+            self.header_chunk.width,
+            self.header_chunk.height,
+            self.bytes_per_pixel, 
+            self.data_chunk
+        )
+
+
     @property
     def Pixel(self):
         return self.pixel
@@ -51,11 +59,4 @@ class Decoder(object):
         return self.bpp
 
     def decode(self):
-        scanlines = split_scanlines(
-            self.header_chunk.width,
-            self.header_chunk.height,
-            self.bytes_per_pixel, 
-            self.data_chunk
-        )
-
-        return reconstructer(scanlines, self.bytes_per_pixel)
+        return reconstructer(self.scanlines, self.bytes_per_pixel)
