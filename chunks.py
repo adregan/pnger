@@ -46,8 +46,8 @@ def parse_ihdr_data(ihdr_chunk):
     )
 
 def create_chunk(data, type):
-    chunk_type = bytes(type, 'utf-8')
-    chunk_length = bytes(str(len(data)), 'utf-8')
+    chunk_type = type.to_bytes(4, 'big')
+    chunk_length = len(data).to_bytes(4, 'big')
     # TODO: CRC FOR REAL http://www.w3.org/TR/PNG/#5CRC-algorithm
     crc = bytes(4)
 
@@ -68,13 +68,13 @@ def create_ihdr_data(
         raise NotImplementedError(
             'Sorry, bit depths other than 8 have not yet been implemented')
 
-    width_b = struct.pack('<I', width)
-    height_b = struct.pack('<I', height)
-    bit_depth_b = bytes(str(bit_depth), 'utf-8')
-    color_type_b = bytes(str(color_type), 'utf-8')
-    compression_type_b = bytes(str(compression_type), 'utf-8')
-    filter_type_b = bytes(str(filter_type), 'utf-8')
-    interlace_type_b = bytes(str(interlace_type), 'utf-8')
+    width_b = width.to_bytes(4, 'big')
+    height_b = height.to_bytes(4, 'big')
+    bit_depth_b = bit_depth.to_bytes(1, 'big')
+    color_type_b = color_type.to_bytes(1, 'big')
+    compression_type_b = compression_type.to_bytes(1, 'big')
+    filter_type_b = filter_type.to_bytes(1, 'big')
+    interlace_type_b = interlace_type.to_bytes(1, 'big')
 
     data = (
         width_b + height_b + bit_depth_b + color_type_b + 

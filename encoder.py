@@ -1,4 +1,5 @@
 from filters import Filters
+from pixels import PIXELS
 
 def filterer(scanlines, bpp):
     original = [list(scanline.get('bytes')) for scanline in scanlines]
