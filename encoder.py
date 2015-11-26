@@ -22,5 +22,13 @@ def filterer(scanlines, bpp):
     return filtered
 
 class Encoder(object):
-    def __init__(self):
-        pass
+    def __init__(self, image_bytes, color_type=2, bit_depth=8):
+        self.image_bytes = image_bytes
+
+        try:
+            self.pixel = PIXELS[color_type]
+        except KeyError as err:
+            raise KeyError('I haven\'t done that yet.')
+        else:
+            self.bpp = int(
+                len(self.pixel._fields) * (bit_depth / 8))
