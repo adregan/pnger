@@ -1,0 +1,2 @@
+class InvalidPNG(Exception):
+    pass
