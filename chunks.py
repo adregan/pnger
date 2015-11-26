@@ -2,6 +2,7 @@ from collections import namedtuple
 import zlib
 import struct
 from errors import InvalidPNG
+from crc import CRC
 
 def split_into_chunks(file_bytes, chunks=[]):
     ''' chunks should look like this:
@@ -46,12 +47,12 @@ def parse_ihdr_data(ihdr_chunk):
     )
 
 def create_chunk(data, type):
-    chunk_type = type.to_bytes(4, 'big')
+    chunk_type = bytes(type, 'utf-8')
     chunk_length = len(data).to_bytes(4, 'big')
-    # TODO: CRC FOR REAL http://www.w3.org/TR/PNG/#5CRC-algorithm
-    crc = bytes(4)
+    buf = chunk_type + data
+    crc = CRC().create(buf)
 
-    return chunk_length + chunk_type + chunk_data + crc
+    return chunk_length + chunk_type + data + crc
 
 def create_ihdr_data(
     width,
