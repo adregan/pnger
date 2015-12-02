@@ -780,34 +780,37 @@ my %colors = (
   "Zinnwaldite brown" => [44,22,8],
 );
 
-# track x-resolution of image
-my $xres;
-# ppm rows
-my @rows;
-
 # Open file for reading
-open(my $fh,'<',$ARGV[0]) or die "can't open $ARGV[0]: $!\n";
-
-while (<$fh>)
+if (open my $fh,'<',$ARGV[0)
 {
-  chomp;			# remove newline
-  next if ($_ !~ m/\. /);	# skip non-sentence lines
+  # track x-resolution of image
+  my $xres;
+  # ppm rows
+  my @rows;
 
-  # split into sentences, record x-resolution too
-  my @sentences = split /\. /;
-  $xres = @sentences;
+  while (<$fh>)
+  {
+    next if ($_ !~ m/\. /);	# skip non-sentence lines
+    chomp;			# remove newline
 
-  # Strip alpha-channel info from sentences
-  map { $_ =~ s/,.*$//g } @sentences;
+    # split into sentences, record x-resolution too
+    my @sentences = split /\. /;
+    $xres = @sentences;
 
-  # magic: convert each sentence to space-separated RGB triad,
-  #  put all triads together with tabs,
-  #  and push onto the end of the rows array.
-  push @rows, join "\t", map { join ' ', @{$colors{$_}} } @sentences;
+    # Strip alpha-channel info from sentences
+    map { $_ =~ s/,.*$//g } @sentences;
+
+    # magic: convert each sentence to space-separated RGB triad,
+    #  put all triads together with tabs,
+    #  and push onto the end of the rows array.
+    push @rows, join "\t", map { join ' ', @{$colors{$_}} } @sentences;
+  }
+
+  # dump ppm
+  say "P3";
+  say "$xres " . @rows;
+  say "255";
+  map { say $_ } @rows;
+} else {
+  die "can't open $ARGV[0]: $!\n";
 }
-
-# dump ppm
-say "P3";
-say "$xres " . @rows;
-say "255";
-map { say $_ } @rows;
