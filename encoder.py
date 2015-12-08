@@ -1,5 +1,6 @@
 from filters import Filters
 from pixels import PIXELS
+from chunks import create_ihdr_data, create_chunk, create_image_data
 
 def filterer(scanlines, bpp):
     original = [list(scanline.get('bytes')) for scanline in scanlines]
@@ -22,13 +23,25 @@ def filterer(scanlines, bpp):
     return filtered
 
 class Encoder(object):
-    def __init__(self, image_bytes, color_type=2, bit_depth=8):
-        self.image_bytes = image_bytes
+    def __init__(self, output_path):
+        self.output_path = output_path
+        self.image_data = None
 
+    def encode(self, image_bytes, width, height, color_type=2, bit_depth=8,
+        compression_type=0, interlace_type=0):
         try:
-            self.pixel = PIXELS[color_type]
+            pixel = PIXELS[color_type]
         except KeyError as err:
-            raise KeyError('I haven\'t done that yet.')
+            raise NotImplementedError('I haven\'t done that yet.')
         else:
-            self.bpp = int(
-                len(self.pixel._fields) * (bit_depth / 8))
+            bpp = int(
+                len(pixel._fields) * (bit_depth / 8))
+
+        if compression_type != 0 or interlace_type != 0:
+            raise NotImplementedError(
+                'Only compression type 0 and interlace type 0 supported.')
+
+        image_header_data = create_ihdr_data(
+            width, height, bit_depth, color_type, 0, 0)
+
+        image_data = create_image_data(image_bytes, width, height, bpp)
