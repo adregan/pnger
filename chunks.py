@@ -78,8 +78,17 @@ def create_image_data(image_bytes, ratio, bytes_per_pixel):
 
     bytes_per_row = width * bytes_per_pixel
 
-    # t = [image_bytes[i * bytes_per_row:(i + 1) *bytes_per_row] for i in range(height)]    
-    # t[height - 1] = t[height - 1] + bytes(bytes_per_row -  len(t[height - 1]))
+    # Adding a single null byte to the start of every row as the filter type 0
+    # TODO: Optimize filter types
+    scan_rows = [
+        bytes(1) + image_bytes[i * bytes_per_row:(i + 1) * bytes_per_row]
+        for i in range(height)
+    ]    
+    # filling in padding on last row
+    scan_rows[height - 1] = scan_rows[height - 1] + bytes(
+        bytes_per_row -  len(scan_rows[height - 1]))
+
+    return zlib.compress(b''.join(scan_rows))
 
 def create_ihdr_data(
     width,
