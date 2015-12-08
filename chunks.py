@@ -1,6 +1,7 @@
 from collections import namedtuple
 import zlib
 import struct
+import math
 from errors import InvalidPNG
 from crc import CRC
 
@@ -53,6 +54,32 @@ def create_chunk(data, type):
     crc = CRC().create(buf)
 
     return chunk_length + chunk_type + data + crc
+
+# def add_padding(image_bytes, total):
+#     ''' add_padding : Bytes Int -> Bytes
+#     add_padding adds null bytes at random throughout the data
+#     '''
+#     import random
+
+
+#     return image_bytes
+
+def create_image_data(image_bytes, ratio, bytes_per_pixel):
+    ''' create_image_data: Bytes Fraction Int -> Bytes
+    creates the Byte string containing the image scanlines at a given ratio
+    '''
+    total_pixels = math.ceil(len(image_bytes) / bytes_per_pixel)
+
+    con_number = math.sqrt(total_pixels / (ratio.numerator * ratio.denominator))
+
+    height = math.ceil(con_number * ratio.denominator)
+
+    width = math.ceil(con_number * ratio.numerator)
+
+    bytes_per_row = width * bytes_per_pixel
+
+    # t = [image_bytes[i * bytes_per_row:(i + 1) *bytes_per_row] for i in range(height)]    
+    # t[height - 1] = t[height - 1] + bytes(bytes_per_row -  len(t[height - 1]))
 
 def create_ihdr_data(
     width,
